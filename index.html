@@ -117,7 +117,7 @@
     background: var(--surface);
     border: 1px solid var(--border); border-radius: var(--radius);
     box-shadow: 0 8px 32px rgba(26,26,46,.15);
-    padding: 1rem; width: 300px; max-width: 96vw;
+    padding: 1rem; width: min(300px, calc(100vw - 2rem)); max-width: calc(100vw - 2rem); left: 50%; transform: translateX(-50%);
   }
   .cal-popup.open { display: block; }
   .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
@@ -250,8 +250,8 @@
 <div class="widget">
 
   <div class="widget-head">
-    <h1>Reserve Your Rentals</h1>
-    <p>Tables, racks &amp; canopies delivered to Evansville &amp; Newburgh — this is renting, not buying!</p>
+    <h1>Book Your Rental</h1>
+
   </div>
 
   <div id="alertError"   class="alert alert-error"></div>
@@ -273,7 +273,7 @@
           </div>
           <div class="cal-popup" id="deliveryCal"></div>
         </div>
-        <div class="field-hint">We deliver on Thursdays.</div>
+
       </div>
 
       <div class="form-field" id="deliverySlotWrap" style="display:none;">
@@ -292,7 +292,7 @@
         <div id="pickupDatePlaceholder" style="padding:.65rem .9rem;border:1px dashed var(--border);border-radius:var(--radius);font-size:.9rem;color:var(--ink-faint);">
           Select a delivery date above — your pickup Sunday will be set automatically.
         </div>
-        <div class="field-hint">Pickup is always the Sunday following your delivery date.</div>
+
       </div>
 
       <div class="form-field" id="pickupSlotWrap" style="display:none;">
@@ -308,8 +308,7 @@
     <!-- Step 2: Packages -->
     <div class="card section-disabled" id="packagesSection">
       <div class="card-title"><span class="step-num">2</span> Choose Your Package</div>
-      <p class="rent-note">🏷️ Everything is a rental — we bring it, you use it, we come get it. No truck needed!</p>
-      <p class="rent-note" style="margin-top:-.5rem;">📦 We drop off and pick up — setup and assembly are on you.</p>
+
       <div class="packages-grid" id="packagesGrid"></div>
       <div class="addons-title">A La Carte Add-Ons</div>
       <div id="addonsContainer"></div>
@@ -401,7 +400,7 @@
     <div class="confirm-id" id="confirmId"></div>
     <div class="confirm-detail" id="confirmDetail"></div>
     <a href="#" class="btn-pay" id="confirmPayBtn" target="_blank" style="display:none;">Complete Payment on Square →</a>
-    <div class="pay-note" id="confirmNote" style="margin-top:.75rem;">A confirmation email has been sent to you.</div>
+    <div class="pay-note" id="confirmNote" style="margin-top:.75rem;">You'll receive a confirmation email once payment is complete.</div>
   </div>
 
 </div>
@@ -902,7 +901,7 @@ function showConfirmation(data,payload,isCustom) {
       <strong>Pickup:</strong> ${fmtDate(payload.pickupDate)} · ${payload.pickupSlot}<br>
       <strong>Address:</strong> ${payload.address}<br>
       <strong>Total:</strong> $${data.total?.toFixed(2)||"—"}<br><br>
-      A confirmation email is on its way to <strong>${payload.email}</strong>.`;
+      <strong>⚠ Your spot is not reserved until payment is complete.</strong> Click the button below to pay now — it only takes a minute. Once payment clears, you'll receive a confirmation email at <strong>${payload.email}</strong>.`;
     if (data.squareUrl) {
       document.getElementById("confirmPayBtn").href=data.squareUrl;
       document.getElementById("confirmPayBtn").style.display="inline-block";
