@@ -838,9 +838,22 @@ async function handleSubmit() {
   };
 
   try {
-    const jsonStr = JSON.stringify(payload);
-    const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(jsonStr)));
-    const res  = await fetch(APPS_SCRIPT_URL + "?payload=" + encodeURIComponent(b64), {
+    // Build URL params — avoids cross-origin POST block and special-char encoding issues
+    const params = new URLSearchParams();
+    params.set("action",       payload.action);
+    params.set("customerName", payload.customerName);
+    params.set("email",        payload.email);
+    params.set("phone",        payload.phone);
+    params.set("address",      payload.address || "");
+    params.set("deliveryDate", payload.deliveryDate);
+    params.set("deliverySlot", payload.deliverySlot);
+    params.set("pickupDate",   payload.pickupDate);
+    params.set("pickupSlot",   payload.pickupSlot);
+    params.set("package",      payload.package);
+    params.set("notes",        payload.notes || "");
+    params.set("recaptchaToken", payload.recaptchaToken || "");
+    params.set("addons",       JSON.stringify(payload.addons || {}));
+    const res  = await fetch(APPS_SCRIPT_URL + "?" + params.toString(), {
       redirect: "follow",
       mode: "cors",
     });
