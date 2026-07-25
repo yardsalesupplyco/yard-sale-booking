@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Your Rentals — Yard Sale Supply Co.</title>
+<link href="https://fonts.googleapis.com/css2?family=Inclusive+Sans:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.contentWindow.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+  :root {
+    --ink:       #1a1a2e;
+    --ink-soft:  #4a4a6a;
+    --ink-faint: #9090b0;
+    --accent:    #2d6a4f;
+    --accent-lt: #d8f3dc;
+    --amber:     #e9c46a;
+    --amber-lt:  #fff8e7;
+    --red:       #c1121f;
+    --red-lt:    #ffe5e7;
+    --surface:   #ffffff;
+    --bg:        #f7f7f2;
+    --border:    #e2e2d8;
+    --radius:    10px;
+    --shadow:    0 2px 16px rgba(26,26,46,.08);
+    --font-head: 'Inclusive Sans', sans-serif;
+    --font-body: 'Inclusive Sans', sans-serif;
+  }
+ 
+  body {
+    font-family: var(--font-body);
+    background: transparent;
+    color: var(--ink);
+    padding: 2rem 1rem 4rem;
+  }
+ 
+  .widget { max-width: 680px; margin: 0 auto; }
+ 
+  .widget-head { text-align: center; margin-bottom: 2rem; }
+  .widget-head h1 {
+    font-family: var(--font-head);
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 700;
+    color: var(--ink); line-height: 1.15; margin-bottom: .4rem;
+  }
+  .widget-head p { font-size: .95rem; color: var(--ink-soft); }
+ 
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .card-title {
+    font-family: var(--font-head);
+    font-size: 1.15rem; font-weight: 700; color: var(--ink);
+    margin-bottom: 1.25rem; padding-bottom: .75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; background: var(--ink); color: #fff;
+    border-radius: 50%; font-size: .75rem; font-weight: 600;
+    flex-shrink: 0; font-family: var(--font-body);
+  }
+ 
+  label {
+    display: block; font-size: .8rem; font-weight: 600;
+    color: var(--ink-soft); margin-bottom: .35rem;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  input[type=text], input[type=email], input[type=tel], textarea {
+    width: 100%; padding: .65rem .9rem;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: var(--font-body); font-size: .95rem; color: var(--ink);
+    background: var(--surface); transition: border-color .15s;
+    outline: none; -webkit-appearance: none; appearance: none;
+  }
+  input:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45,106,79,.1);
+  }
+  textarea { resize: vertical; min-height: 100px; }
+ 
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-field { margin-bottom: 1rem; }
+  .form-field:last-child { margin-bottom: 0; }
+  .field-hint { font-size: .78rem; color: var(--ink-faint); margin-top: .3rem; line-height: 1.4; }
+  @media(max-width:520px) { .form-row { grid-template-columns: 1fr; } }
+ 
+  /* ── Custom calendar ── */
+  .date-grid-wrap { position: relative; }
+  .date-display {
+    width: 100%; padding: .65rem .9rem;
+    border: 1px solid var(--border); border-radius: var(--radius);
+    font-family: var(--font-body); font-size: .95rem; color: var(--ink);
+    background: var(--surface); cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: border-color .15s; user-select: none;
+  }
+  .date-display:hover, .date-display.open {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(45,106,79,.1);
+  }
+  .date-display .placeholder { color: var(--ink-faint); }
+  .date-display .chevron { font-size: .75rem; color: var(--ink-faint); transition: transform .2s; }
+  .date-display.open .chevron { transform: rotate(180deg); }
+ 
+  .cal-popup {
+    display: none; position: absolute;
+    top: calc(100% + 6px); left: 0; z-index: 200;
+    background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(26,26,46,.15);
+    padding: 1rem; width: 300px; max-width: 96vw;
+  }
+  .cal-popup.open { display: block; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .75rem; }
+  .cal-month { font-weight: 600; font-size: .95rem; }
+  .cal-nav {
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    width: 28px; height: 28px; cursor: pointer; font-size: .9rem;
+    display: flex; align-items: center; justify-content: center; transition: all .15s;
+  }
+  .cal-nav:hover { background: var(--accent-lt); border-color: var(--accent); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-dow { text-align: center; font-size: .7rem; font-weight: 600; color: var(--ink-faint); padding: .25rem 0; }
+  .cal-day { text-align: center; padding: .4rem .2rem; border-radius: 6px; font-size: .82rem; cursor: pointer; transition: all .15s; line-height: 1.2; }
+  .cal-day.available:hover { background: var(--accent-lt); color: var(--accent); font-weight: 600; }
+  .cal-day.selected { background: var(--accent); color: #fff; font-weight: 600; }
+  .cal-day.unavailable { color: #d0d0d8; cursor: not-allowed; }
+  .cal-day.past { color: #d0d0d8; cursor: not-allowed; }
+  .cal-day.empty { cursor: default; }
+ 
+  /* ── Time slots ── */
+  .slots-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: .5rem; margin-top: .5rem; }
+  .slot-btn {
+    padding: .55rem .5rem;
+    border: 1.5px solid var(--border); border-radius: var(--radius);
+    background: var(--surface); font-family: var(--font-body);
+    font-size: .82rem; font-weight: 500; color: var(--ink-soft);
+    cursor: pointer; transition: all .15s; text-align: center;
+  }
+  .slot-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .slot-btn.selected { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+  .slot-btn:disabled { opacity: .35; cursor: not-allowed; text-decoration: line-through; }
+  .slot-avail { display: block; font-size: .68rem; margin-top: .15rem; opacity: .75; }
+ 
+  /* ── Packages ── */
+  .packages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .75rem; margin-bottom: 1.25rem; }
+  .pkg-card {
+    border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 1rem .85rem; cursor: pointer; transition: all .18s; text-align: center;
+  }
+  .pkg-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .pkg-card.selected { border-color: var(--accent); background: var(--accent-lt); }
+  .pkg-card.custom-card:hover, .pkg-card.custom-card.selected { border-color: var(--amber); background: var(--amber-lt); }
+  .pkg-icon { font-size: 1.6rem; margin-bottom: .4rem; }
+  .pkg-size { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: .2rem; }
+  .pkg-name { font-size: .88rem; font-weight: 700; color: var(--ink); margin-bottom: .35rem; }
+  .pkg-includes { font-size: .75rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: .4rem; }
+  .pkg-price { font-size: .92rem; font-weight: 700; color: var(--accent); }
+  .pkg-card.custom-card .pkg-price { color: #7d5a00; }
+  .rent-note { font-size: .78rem; color: var(--ink-faint); text-align: center; margin-bottom: 1rem; font-style: italic; }
+ 
+  /* ── Add-ons ── */
+  .addons-title {
+    font-size: .8rem; font-weight: 700; color: var(--ink-soft);
+    letter-spacing: .06em; text-transform: uppercase;
+    margin-bottom: .65rem; padding-top: 1rem; border-top: 1px solid var(--border);
+  }
+  .addon-row { display: flex; align-items: center; justify-content: space-between; padding: .6rem 0; border-bottom: 1px solid var(--bg); }
+  .addon-name { font-size: .88rem; font-weight: 600; color: var(--ink); }
+  .addon-price { font-size: .78rem; color: var(--ink-soft); margin-top: .1rem; }
+  .addon-qty { display: flex; align-items: center; gap: .5rem; }
+  .qty-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1.5px solid var(--border); background: var(--surface);
+    color: var(--ink-soft); font-size: 1rem; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .qty-num { font-size: .95rem; font-weight: 600; min-width: 22px; text-align: center; }
+ 
+  /* ── Summary ── */
+  .summary-table { width: 100%; font-size: .9rem; border-collapse: collapse; }
+  .summary-table td { padding: .45rem 0; }
+  .summary-table td:last-child { text-align: right; font-weight: 500; }
+  .summary-divider { border-top: 1px solid var(--border); }
+  .summary-total td { font-weight: 700; font-size: 1rem; padding-top: .65rem; }
+ 
+  /* ── Alerts ── */
+  .alert { padding: .8rem 1rem; border-radius: var(--radius); font-size: .88rem; margin-bottom: 1rem; display: none; line-height: 1.5; }
+  .alert.show { display: block; }
+  .alert-error   { background: var(--red-lt);   color: var(--red);    border: 1px solid #ffc8ca; }
+  .alert-success { background: var(--accent-lt); color: var(--accent); border: 1px solid #b7e4c7; }
+  .alert-info    { background: var(--amber-lt);  color: #7d5a00;       border: 1px solid #f4d58d; }
+ 
+  /* ── Buttons ── */
+  .btn-primary {
+    display: block; width: 100%; padding: 1rem;
+    background: var(--ink); color: #fff; border: none; border-radius: var(--radius);
+    font-family: var(--font-body); font-size: 1rem; font-weight: 600;
+    cursor: pointer; letter-spacing: .02em; transition: background .15s, transform .1s;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent); }
+  .btn-primary:active:not(:disabled) { transform: scale(.99); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary.inquiry { background: #7d5a00; }
+  .btn-primary.inquiry:hover:not(:disabled) { background: #5a3f00; }
+  .btn-check {
+    display: block; width: 100%; padding: .75rem;
+    background: var(--surface); color: var(--accent);
+    border: 1.5px solid var(--accent); border-radius: var(--radius);
+    font-family: var(--font-body); font-size: .9rem; font-weight: 600;
+    cursor: pointer; margin-top: .75rem; transition: all .15s;
+  }
+  .btn-check:hover { background: var(--accent-lt); }
+ 
+  .spinner {
+    display: inline-block; width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+    border-radius: 50%; animation: spin .6s linear infinite;
+    vertical-align: middle; margin-right: .4rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+ 
+  /* ── Confirmation ── */
+  .confirmation { display: none; text-align: center; padding: 2rem 1rem; }
+  .confirmation.show { display: block; }
+  .confirm-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+  .confirm-title { font-family: var(--font-head); font-size: 1.8rem; font-weight: 700; color: var(--accent); margin-bottom: .5rem; }
+  .confirm-id { font-size: .85rem; color: var(--ink-faint); margin-bottom: 1.5rem; }
+  .confirm-detail { background: var(--bg); border-radius: var(--radius); padding: 1.25rem; text-align: left; margin-bottom: 1.5rem; font-size: .9rem; line-height: 1.8; }
+  .btn-pay { display: inline-block; padding: .9rem 2rem; background: var(--accent); color: #fff; border-radius: var(--radius); font-weight: 600; font-size: 1rem; text-decoration: none; transition: background .15s; margin-bottom: .75rem; }
+  .btn-pay:hover { background: #1b4332; }
+  .pay-note { font-size: .78rem; color: var(--ink-faint); }
+ 
+  .section-disabled { opacity: .42; pointer-events: none; transition: opacity .3s; }
+  .section-enabled  { opacity: 1;   pointer-events: auto; transition: opacity .3s; }
+</style>
+</head>
+<body>
+<div class="widget">
+ 
+  <div class="widget-head">
+    <h1>Reserve Your Rentals</h1>
+    <p>Tables, racks &amp; canopies delivered to Evansville &amp; Newburgh — this is renting, not buying!</p>
+  </div>
+ 
+  <div id="alertError"   class="alert alert-error"></div>
+  <div id="alertSuccess" class="alert alert-success"></div>
+  <div id="alertInfo"    class="alert alert-info"></div>
+ 
+  <div id="bookingForm">
+ 
+    <div class="card">
+      <div class="card-title"><span class="step-num">1</span> Choose Your Dates &amp; Times</div>
+ 
+      <div class="form-field">
+        <label>When do you want your order delivered to your house?</label>
+        <div class="date-grid-wrap">
+          <div class="date-display" id="deliveryDisplay" onclick="toggleCal('delivery')">
+            <span id="deliveryDisplayText" class="placeholder">Select a Thursday…</span>
+            <span class="chevron">▾</span>
+          </div>
+          <div class="cal-popup" id="deliveryCal"></div>
+        </div>
+        <div class="field-hint">We deliver on Thursdays.</div>
+      </div>
+ 
+      <div class="form-field" id="deliverySlotWrap" style="display:none;">
+        <label>Preferred delivery time window</label>
+        <div class="slots-grid" id="deliverySlots"></div>
+      </div>
+ 
+      <div class="form-field" style="margin-top:1.1rem;" id="pickupDateField">
+        <label>Your pickup date</label>
+        <div id="pickupDateLocked" style="display:none;">
+          <div style="padding:.65rem .9rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);font-size:.95rem;color:var(--ink);display:flex;align-items:center;gap:.5rem;">
+            <span id="pickupLockedText" style="font-weight:600;"></span>
+            <span style="margin-left:auto;font-size:.75rem;color:var(--accent);font-weight:600;background:var(--accent-lt);padding:.2rem .6rem;border-radius:999px;">Auto-set</span>
+          </div>
+        </div>
+        <div id="pickupDatePlaceholder" style="padding:.65rem .9rem;border:1px dashed var(--border);border-radius:var(--radius);font-size:.9rem;color:var(--ink-faint);">
+          Select a delivery date above — your pickup Sunday will be set automatically.
+        </div>
+        <div class="field-hint">Pickup is always the Sunday following your delivery date.</div>
+      </div>
+ 
+      <div class="form-field" id="pickupSlotWrap" style="display:none;">
+        <label>Preferred pickup time window</label>
+        <div class="slots-grid" id="pickupSlots"></div>
+      </div>
+ 
+      <button class="btn-check" id="checkAvailBtn" onclick="checkAvailability()" disabled>
+        Check Availability →
+      </button>
+    </div>
+ 
+    <div class="card section-disabled" id="packagesSection">
+      <div class="card-title"><span class="step-num">2</span> Choose Your Package</div>
+      <p class="rent-note">🏷️ Everything is a rental — we bring it, you use it, we come get it. No truck needed!</p>
+      <p class="rent-note" style="margin-top:-.5rem;">📦 We drop off and pick up — setup and assembly are on you.</p>
+      <div class="packages-grid" id="packagesGrid"></div>
+      <div class="addons-title">A La Carte Add-Ons</div>
+      <div id="addonsContainer"></div>
+    </div>
+ 
+    <div class="card section-disabled" id="detailsSection">
+      <div class="card-title"><span class="step-num">3</span> Your Details</div>
+      <div id="inquiryNote" class="alert alert-info" style="display:none;">
+        Tell us what you need below and we'll follow up with a custom quote!
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="customerName">First &amp; Last Name *</label>
+          <input type="text" id="customerName" placeholder="Jane Smith">
+        </div>
+        <div class="form-field">
+          <label for="phone">Phone *</label>
+          <input type="tel" id="phone" placeholder="812-555-0000">
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" placeholder="you@email.com">
+      </div>
+      <div class="form-field" id="addressField">
+        <label for="address">Delivery Address *</label>
+        <input type="text" id="address" placeholder="123 Main St, Evansville, IN 47714" autocomplete="off" onblur="validateAddress()">
+        <div class="field-hint" id="addressHint"></div>
+      </div>
+      <div class="form-field">
+        <label for="notes" id="notesLabel">Notes (optional)</label>
+        <textarea id="notes" placeholder="Any special instructions for delivery?"></textarea>
+      </div>
+      <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;overflow:hidden;" aria-hidden="true">
+        <label for="website">Leave this blank</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+      </div>
+    </div>
+ 
+    <div class="card section-disabled" id="summarySection">
+      <div class="card-title"><span class="step-num">4</span> <span id="summaryTitle">Order Summary</span></div>
+      <table class="summary-table">
+        <tbody id="summaryBody"></tbody>
+        <tfoot>
+          <tr class="summary-divider summary-total">
+            <td>Total Due</td>
+            <td id="summaryTotal">$0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+      <p id="paymentNote" style="font-size:.78rem;color:var(--ink-faint);margin-top:.75rem;line-height:1.5;">
+        You'll be redirected to Square to complete payment after submitting. Your booking isn't confirmed until payment is received.
+      </p>
+ 
+      <div id="agreementWrap" style="margin-top:1.1rem;padding:1rem;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);">
+        <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;text-transform:none;letter-spacing:0;font-size:.88rem;font-weight:400;color:var(--ink);line-height:1.5;">
+          <input type="checkbox" id="agreementCheck" onchange="onAgreementChange()"
+            style="width:18px;height:18px;margin-top:2px;flex-shrink:0;accent-color:var(--accent);cursor:pointer;">
+          <span>
+            I have read and agree to the
+            <a href="https://drive.google.com/file/d/16lNJJmIugmAXxLUW1m6B3Ekl-wgnErAc/view?usp=sharing" target="_blank"
+              style="color:var(--accent);font-weight:600;text-decoration:underline;">
+              Yard Sale Supply Co. Rental Agreement
+            </a>
+            , including the damage fee policy, delivery &amp; pickup terms, and renter responsibilities.
+            <span style="color:var(--red);font-weight:700;"> *</span>
+          </span>
+        </label>
+        <div id="agreementError" style="display:none;font-size:.8rem;color:var(--red);margin-top:.4rem;padding-left:1.65rem;">
+          ⚠ You must read and agree to the Rental Agreement before booking.
+        </div>
+      </div>
+      <br>
+      <button class="btn-primary" id="submitBtn" onclick="handleSubmit()" disabled>
+        Book &amp; Proceed to Payment →
+      </button>
+    </div>
+ 
+  </div><div class="card confirmation" id="confirmationScreen">
+    <div class="confirm-icon" id="confirmIcon">✅</div>
+    <div class="confirm-title" id="confirmTitle">Booking Received!</div>
+    <div class="confirm-id" id="confirmId"></div>
+    <div class="confirm-detail" id="confirmDetail"></div>
+    <a href="#" class="btn-pay" id="confirmPayBtn" target="_blank" style="display:none;">Complete Payment on Square →</a>
+    <div class="pay-note" id="confirmNote" style="margin-top:.75rem;">A confirmation email has been sent to you.</div>
+  </div>
+ 
+</div>
+ 
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────
+const APPS_SCRIPT_URL    = "https://script.google.com/macros/s/AKfycbwTtCYIyOX6qTiRcXccqghZSN8-9SPaWaFiDHWCKs3mKFx2xQquor0-ocTtqX19BE96lA/exec";
+const RECAPTCHA_SITE_KEY = "6LeT4tQsAAAAAORSP7zCJMbODkKtAdkvBISq0bxm";
+ 
+// ── PACKAGES ─────────────────────────────────────────────────────────
+const PACKAGES = [
+  { id:"small",  size:"Small",  name:"The Closet Cleanse",       icon:"👚", includes:"4 folding tables (6ft) · 1 clothing rack · 2 yard signs (18\"×12\" w/ stakes)",  price:59,  custom:false },
+  { id:"medium", size:"Medium", name:"The Mid-Life Purge",        icon:"📦", includes:"6 folding tables (6ft) · 2 clothing racks · 3 yard signs (18\"×12\" w/ stakes)", price:79,  custom:false },
+  { id:"large",  size:"Large",  name:"The Full House Heave-Ho",   icon:"🏠", includes:"8 folding tables (6ft) · 3 clothing racks · 4 yard signs (18\"×12\" w/ stakes)", price:99,  custom:false },
+  { id:"custom", size:"Custom", name:"I Mean, idk Where to Start",icon:"🤷", includes:"HOA sale? Church rummage? Tell us what you're thinking.", price:null, custom:true },
+];
+ 
+const TABLE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" style="vertical-align:middle;display:inline-block;">
+  <rect x="2" y="10" width="28" height="4" rx="1.5" fill="#2d6a4f"/>
+  <rect x="14.5" y="14" width="3" height="5" fill="#2d6a4f"/>
+  <rect x="5" y="19" width="2.5" height="7" rx="1" fill="#2d6a4f"/>
+  <rect x="24.5" y="19" width="2.5" height="7" rx="1" fill="#2d6a4f"/>
+  <rect x="5" y="19" width="22" height="2.5" rx="1" fill="#2d6a4f"/>
+</svg>`;
+ 
+const ADDONS = [
+  { id:"addon_table",  name:"Extra 6ft Table",              icon:TABLE_SVG, price:10 },
+  { id:"addon_rack",   name:"Extra Clothing Rack",           icon:"👕", price:10 },
+  { id:"addon_canopy", name:"EZ-Up Canopy",                  icon:"⛺", price:15 },
+  { id:"addon_sign",   name:"Yard Sign (18\"×12\" w/ stakes)",    icon:"🪧", price:5  },
+];
+ 
+const DELIVERY_SLOTS = ["4:00–5:00 PM","5:00–6:00 PM","6:00–7:00 PM"];
+const PICKUP_SLOTS   = ["2:00–3:00 PM","3:00–4:00 PM","4:00–5:00 PM"];
+const MAX_PER_SLOT   = 3;
+ 
+// ── STATE ─────────────────────────────────────────────────────────────
+let selDeliveryDate = null, selPickupDate = null;
+let selDeliverySlot = null, selPickupSlot = null;
+let selPackage      = null;
+let addonQtys       = {};  ADDONS.forEach(a => addonQtys[a.id] = 0);
+let slotBookings    = {}; 
+let CAL = {
+  delivery: { month:0, year:0 },
+  pickup:   { month:0, year:0 },
+};
+ 
+// ── CALENDAR ──────────────────────────────────────────────────────────
+function initCals() {
+  const n = new Date();
+  CAL.delivery.month = n.getMonth();
+  CAL.delivery.year  = n.getFullYear();
+  renderCal("delivery");
+}
+ 
+function isAllowed(date, type) {
+  return date.getDay() === 4; 
+}
+ 
+function isPast(date) {
+  const cut = new Date(); cut.setHours(0,0,0,0); cut.setDate(cut.getDate()+2);
+  return date < cut;
+}
+ 
+function toStr(date) { return date.toISOString().split("T")[0]; }
+ 
+function renderCal(type) {
+  const {month, year} = CAL[type];
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const DOWS   = ["Su","Mo","Tu","We","Th","Fr","Sa"];
+  const first  = new Date(year, month, 1).getDay();
+  const days   = new Date(year, month+1, 0).getDate();
+ 
+  let html = `<div class="cal-header">
+    <button class="cal-nav" onclick="navCal('${type}',-1,event)">‹</button>
+    <span class="cal-month">${MONTHS[month]} ${year}</span>
+    <button class="cal-nav" onclick="navCal('${type}',1,event)">›</button>
+  </div><div class="cal-grid">
+  ${DOWS.map(d=>`<div class="cal-dow">${d}</div>`).join("")}
+  ${Array(first).fill('<div class="cal-day empty"></div>').join("")}`;
+ 
+  for (let d=1; d<=days; d++) {
+    const date = new Date(year, month, d);
+    const str  = toStr(date);
+    const ok   = isAllowed(date, type);
+    const past = isPast(date);
+    const sel  = (type==="delivery"&&selDeliveryDate===str)||(type==="pickup"&&selPickupDate===str);
+    let cls = "cal-day" + (past||!ok ? " unavailable" : sel ? " selected" : " available");
+    const click = (!past&&ok) ? `onclick="selectDate('${type}','${str}')"` : "";
+    html += `<div class="${cls}" ${click}>${d}</div>`;
+  }
+  html += "</div>";
+  document.getElementById(type+"Cal").innerHTML = html;
+}
+ 
+function navCal(type, dir, event) {
+  event.stopPropagation();
+  CAL[type].month += dir;
+  if (CAL[type].month>11){CAL[type].month=0; CAL[type].year++;}
+  if (CAL[type].month<0) {CAL[type].month=11;CAL[type].year--;}
+  renderCal(type);
+  document.getElementById(type+"Cal").classList.add("open");
+  document.getElementById(type+"Display").classList.add("open");
+}
+ 
+function toggleCal(type) {
+  const popup = document.getElementById(type+"Cal");
+  const disp  = document.getElementById(type+"Display");
+  const open  = popup.classList.contains("open");
+  document.querySelectorAll(".cal-popup").forEach(p=>p.classList.remove("open"));
+  document.querySelectorAll(".date-display").forEach(d=>d.classList.remove("open"));
+  if (!open) { popup.classList.add("open"); disp.classList.add("open"); }
+}
+ 
+function selectDate(type, str) {
+  const d = new Date(str+"T12:00:00");
+  const label = d.toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"});
+  if (type==="delivery") {
+    selDeliveryDate=str; selDeliverySlot=null;
+    document.getElementById("deliveryDisplayText").textContent=label;
+    document.getElementById("deliveryDisplayText").classList.remove("placeholder");
+    document.getElementById("deliveryCal").classList.remove("open");
+    document.getElementById("deliveryDisplay").classList.remove("open");
+    renderCal("delivery");
+    renderSlots("delivery");
+ 
+    const pickupDate = new Date(d);
+    pickupDate.setDate(pickupDate.getDate() + 3);
+    selPickupDate = toStr(pickupDate);
+    selPickupSlot = null;
+    const pickupLabel = pickupDate.toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"});
+    document.getElementById("pickupLockedText").textContent = pickupLabel;
+    document.getElementById("pickupDateLocked").style.display = "block";
+    document.getElementById("pickupDatePlaceholder").style.display = "none";
+    renderSlots("pickup");
+    resetAvailabilityConfirmation();
+  }
+  checkReady();
+}
+ 
+function resetAvailabilityConfirmation() {
+  const btn = document.getElementById("checkAvailBtn");
+  btn.innerHTML = "Check Availability →";
+  btn.style.background = ""; btn.style.color = ""; btn.style.borderColor = "";
+  document.getElementById("alertSuccess").classList.remove("show");
+  const pkgSection = document.getElementById("packagesSection");
+  pkgSection.classList.remove("section-enabled"); pkgSection.classList.add("section-disabled");
+  document.getElementById("packagesGrid").innerHTML = "";
+  document.getElementById("addonsContainer").innerHTML = "";
+  selPackage = null;
+  ADDONS.forEach(a => addonQtys[a.id] = 0);
+  ["detailsSection","summarySection"].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove("section-enabled"); el.classList.add("section-disabled");
+  });
+  document.getElementById("submitBtn").disabled = true;
+  document.getElementById("summaryBody").innerHTML = "";
+  document.getElementById("summaryTotal").textContent = "$0.00";
+}
+ 
+document.addEventListener("click", e => {
+  if (!e.target.closest(".date-grid-wrap")) {
+    document.querySelectorAll(".cal-popup").forEach(p=>p.classList.remove("open"));
+    document.querySelectorAll(".date-display").forEach(d=>d.classList.remove("open"));
+  }
+});
+ 
+// ── TIME SLOTS ────────────────────────────────────────────────────────
+function renderSlots(type) {
+  const wrap   = document.getElementById(type+"SlotWrap");
+  const grid   = document.getElementById(type+"Slots");
+  const date   = type==="delivery" ? selDeliveryDate : selPickupDate;
+  const labels = type==="delivery" ? DELIVERY_SLOTS  : PICKUP_SLOTS;
+  wrap.style.display = "block";
+  grid.innerHTML = "";
+  labels.forEach(label => {
+    const key   = `${date}||${label}`;
+    const used  = slotBookings[key]||0;
+    const left  = MAX_PER_SLOT - used;
+    const full  = left<=0;
+    const isSel = (type==="delivery"&&selDeliverySlot===label)||(type==="pickup"&&selPickupSlot===label);
+    const btn   = document.createElement("button");
+    btn.className = "slot-btn"+(isSel?" selected":"");
+    btn.disabled  = full;
+    btn.innerHTML = `${label}<span class="slot-avail">${full?"Full":left+" spot"+(left===1?"":"s")+" left"}</span>`;
+    btn.onclick   = () => { if(type==="delivery") selDeliverySlot=label; else selPickupSlot=label; renderSlots(type); checkReady(); };
+    grid.appendChild(btn);
+  });
+}
+ 
+function checkReady() {
+  const ok = selDeliveryDate && selDeliverySlot && selPickupDate && selPickupSlot;
+  clearMessages();
+  document.getElementById("checkAvailBtn").disabled = !ok;
+}
+ 
+// ── CHECK AVAILABILITY ────────────────────────────────────────────────
+async function checkAvailability() {
+  const btn = document.getElementById("checkAvailBtn");
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Checking…';
+  clearMessages();
+  try {
+    const url = `${APPS_SCRIPT_URL}?action=checkAvailability&deliveryDate=${selDeliveryDate}&pickupDate=${selPickupDate}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (!data.success) {
+      showError(data.error);
+      btn.innerHTML="Check Availability →"; btn.disabled=false;
+      return;
+    }
+    slotBookings = data.slotBookings||{};
+    renderSlots("delivery"); renderSlots("pickup");
+  } catch(e) {
+    slotBookings={};
+  }
+  showAvailabilitySuccess();
+  enableSection("packagesSection");
+  buildPackages(); buildAddons();
+  btn.innerHTML="✓ Availability Confirmed"; btn.disabled=false;
+  btn.style.background="var(--accent-lt)"; btn.style.color="var(--accent)"; btn.style.borderColor="var(--accent)";
+  setTimeout(() => { document.getElementById("packagesSection").scrollIntoView({ behavior:"smooth", block:"start" }); }, 400);
+}
+ 
+// ── PACKAGES ──────────────────────────────────────────────────────────
+function buildPackages() {
+  const grid = document.getElementById("packagesGrid");
+  grid.innerHTML="";
+  PACKAGES.forEach(pkg => {
+    const div = document.createElement("div");
+    div.className = "pkg-card"+(pkg.custom?" custom-card":"");
+    div.id = "pkg-"+pkg.id;
+    div.onclick = () => selectPackage(pkg.id);
+    div.innerHTML = `
+      <div class="pkg-icon">${pkg.icon}</div>
+      <div class="pkg-size">${pkg.size}</div>
+      <div class="pkg-name">${pkg.name}</div>
+      <div class="pkg-includes">${pkg.includes}</div>
+      <div class="pkg-price">${pkg.price?"$"+pkg.price+" rental":"Custom Quote"}</div>`;
+    grid.appendChild(div);
+  });
+}
+ 
+function selectPackage(id) {
+  selPackage=id;
+  document.querySelectorAll(".pkg-card").forEach(c=>c.classList.remove("selected"));
+  document.getElementById("pkg-"+id).classList.add("selected");
+  const isCustom = id==="custom";
+  document.getElementById("inquiryNote").style.display    = isCustom?"block":"none";
+  document.getElementById("addressField").style.display   = isCustom?"none":"block";
+  document.getElementById("notesLabel").textContent       = isCustom?"Tell us what you need *":"Notes (optional)";
+  document.getElementById("notes").placeholder            = isCustom ? "HOA neighborhood sale? Church rummage? Tell us what you need." : "Any special instructions for delivery?";
+  document.getElementById("summaryTitle").textContent     = isCustom?"Inquiry Summary":"Order Summary";
+  document.getElementById("paymentNote").style.display    = isCustom?"none":"block";
+  document.getElementById("agreementWrap").style.display  = isCustom?"none":"block";
+  document.getElementById("submitBtn").textContent        = isCustom?"Send Inquiry →":"Book & Proceed to Payment →";
+  document.getElementById("submitBtn").className         = isCustom?"btn-primary inquiry":"btn-primary";
+  enableSection("detailsSection");
+  enableSection("summarySection");
+  updateSummary();
+}
+ 
+// ── ADD-ONS ───────────────────────────────────────────────────────────
+function buildAddons() {
+  const c = document.getElementById("addonsContainer");
+  c.innerHTML="";
+  ADDONS.forEach(a => {
+    const row = document.createElement("div");
+    row.className="addon-row";
+    row.innerHTML=`
+      <div class="addon-info">
+        <div class="addon-name"><span style="display:inline-block;width:22px;text-align:center;">${a.icon}</span> ${a.name}</div>
+        <div class="addon-price">+$${a.price} each (rental)</div>
+      </div>
+      <div class="addon-qty">
+        <button class="qty-btn" onclick="changeAddon('${a.id}',-1)">−</button>
+        <span class="qty-num" id="aq-${a.id}">0</span>
+        <button class="qty-btn" onclick="changeAddon('${a.id}',1)">+</button>
+      </div>`;
+    c.appendChild(row);
+  });
+}
+ 
+function changeAddon(id, delta) {
+  addonQtys[id]=Math.max(0,(addonQtys[id]||0)+delta);
+  document.getElementById("aq-"+id).textContent=addonQtys[id];
+  updateSummary();
+}
+ 
+// ── SUMMARY ───────────────────────────────────────────────────────────
+function updateSummary() {
+  const tbody = document.getElementById("summaryBody");
+  tbody.innerHTML = ""; let total = 0;
+  if (selPackage && selPackage !== "custom") {
+    const pkg = PACKAGES.find(p => p.id === selPackage);
+    if (pkg) { addRow(tbody, pkg.name + " package", pkg.price); total += pkg.price; }
+  } else if (selPackage === "custom") {
+    addRow(tbody, "Custom inquiry — we'll follow up!", null);
+  }
+  ADDONS.forEach(a => {
+    const q = addonQtys[a.id] || 0;
+    if (q > 0) { const s = q * a.price; addRow(tbody, `${q}× ${a.name}`, s); total += s; }
+  });
+  if (selDeliveryDate && selDeliverySlot) addRow(tbody, "Delivery: " + fmtDate(selDeliveryDate) + " · " + selDeliverySlot, null);
+  if (selPickupDate && selPickupSlot)     addRow(tbody, "Pickup: " + fmtDate(selPickupDate) + " · " + selPickupSlot, null);
+  document.getElementById("summaryTotal").textContent = (selPackage==="custom") ? "TBD" : `$${total.toFixed(2)}`;
+  document.getElementById("submitBtn").disabled = !selPackage;
+}
+ 
+function addRow(tbody,label,amount){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`<td>${label}</td><td>${amount!==null?"$"+amount.toFixed(2):"—"}</td>`;
+  tbody.appendChild(tr);
+}
+ 
+// ── ADDRESS VALIDATION ────────────────────────────────────────────────
+const AREA_CITIES = ["evansville","newburgh"];
+const AREA_ZIPS   = ["47701","47702","47703","47704","47705","47706","47708","47710","47711","47712","47713","47714","47715","47716","47719","47720","47721","47722","47724","47725","47728","47730","47731","47732","47733","47734","47735","47736","47737","47738","47739","47740","47741","47744","47747","47750","47630","47803"];
+ 
+function validateAddress() {
+  const val  = document.getElementById("address").value.toLowerCase();
+  const hint = document.getElementById("addressHint");
+  if (val.length<8) { hint.textContent=""; return true; }
+  const ok = AREA_CITIES.some(c=>val.includes(c)) || AREA_ZIPS.some(z=>val.includes(z));
+  if (!ok) {
+    hint.textContent="⚠ Delivery outside our local area may require a fee. We'll contact you!";
+    hint.style.color="var(--red)"; return false;
+  }
+  hint.textContent="✓ Great — we deliver there!"; hint.style.color="var(--accent)"; return true;
+}
+ 
+function onAgreementChange() {
+  const checked = document.getElementById("agreementCheck").checked;
+  const wrap    = document.getElementById("agreementWrap");
+  wrap.style.borderColor = checked ? "var(--accent)" : "var(--border)";
+  wrap.style.background  = checked ? "var(--accent-lt)" : "var(--bg)";
+  document.getElementById("agreementError").style.display = "none";
+}
+ 
+// ── SUBMIT ────────────────────────────────────────────────────────────
+async function handleSubmit() {
+  const name  = document.getElementById("customerName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const notes = document.getElementById("notes").value.trim();
+  const isCustom = selPackage==="custom";
+  if (!isCustom) {
+    const agreed = document.getElementById("agreementCheck").checked;
+    if (!agreed) {
+      document.getElementById("agreementError").style.display = "block";
+      document.getElementById("agreementWrap").scrollIntoView({ behavior:"smooth", block:"nearest" });
+      return;
+    }
+  }
+  if (!name||!email||!phone) { showError("Please fill in your name, email, and phone number."); return; }
+  if (document.getElementById("website").value !== "") return;
+ 
+  const btn=document.getElementById("submitBtn");
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Submitting…';
+  clearMessages();
+ 
+  let recaptchaToken = "";
+  try { recaptchaToken = await grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: "submit_booking" }); } catch(e) { recaptchaToken = "recaptcha_unavailable"; }
+ 
+  const payload={
+    action: isCustom?"submitInquiry":"submitBooking",
+    customerName: name, email, phone,
+    address: isCustom?"":document.getElementById("address").value.trim(),
+    deliveryDate: selDeliveryDate, deliverySlot: selDeliverySlot,
+    pickupDate: selPickupDate, pickupSlot: selPickupSlot,
+    package: selPackage, addons: addonQtys, notes, recaptchaToken,
+  };
+ 
+  try {
+    const res  = await fetch(APPS_SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const data = await res.json();
+    if (!data.success) { showError(data.error||"Something went wrong."); btn.disabled=false; return; }
+    showConfirmation(data,payload,isCustom);
+  } catch(e) { showError("Connection error. Please try again or contact us directly."); btn.disabled=false; }
+}
+ 
+function showConfirmation(data,payload,isCustom) {
+  document.getElementById("bookingForm").style.display="none";
+  document.getElementById("confirmationScreen").classList.add("show");
+  if (isCustom) {
+    document.getElementById("confirmTitle").textContent="Inquiry Sent!";
+    document.getElementById("confirmDetail").innerHTML=`We'll be in touch with a quote for <strong>${payload.customerName}</strong> soon.`;
+  } else {
+    document.getElementById("confirmId").textContent=`Booking ID: ${data.bookingId}`;
+    document.getElementById("confirmDetail").innerHTML=`
+      <strong>Package:</strong> ${payload.package}<br>
+      <strong>Total:</strong> $${data.total?.toFixed(2)||"—"}<br><br>
+      Confirmation sent to <strong>${payload.email}</strong>.`;
+    if (data.squareUrl) { document.getElementById("confirmPayBtn").href=data.squareUrl; document.getElementById("confirmPayBtn").style.display="inline-block"; }
+  }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+ 
+// ── HELPERS ───────────────────────────────────────────────────────────
+function fmtDate(str){ return new Date(str+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"}); }
+function enableSection(id){ const el=document.getElementById(id); el.classList.remove("section-disabled"); el.classList.add("section-enabled"); }
+function showError(msg){ const el=document.getElementById("alertError"); el.innerHTML=msg; el.classList.add("show"); el.scrollIntoView({behavior:"smooth",block:"nearest"}); }
+function clearMessages(){ ["alertError","alertSuccess","alertInfo"].forEach(id=>document.getElementById(id).classList.remove("show")); }
+function showAvailabilitySuccess() {
+  const el = document.getElementById("alertSuccess");
+  el.innerHTML = `<strong>🎉 Those dates are available!</strong><br><span style="font-size:.85rem;">Scroll down to choose your package.</span>`;
+  el.classList.add("show");
+}
+ 
+// ── GOOGLE PLACES AUTOCOMPLETE ────────────────────────────────────────
+function initAutocomplete() {
+  if (!window.google || !window.google.maps) return;
+  const input = document.getElementById("address");
+  const ac = new google.maps.places.Autocomplete(input, {
+    componentRestrictions: { country: "us" },
+    fields: ["formatted_address"],
+    types: ["address"],
+  });
+  ac.addListener("place_changed", () => {
+    const place = ac.getPlace();
+    if (place.formatted_address) { input.value = place.formatted_address; validateAddress(); }
+  });
+}
+ 
+initCals();
+window.initAutocomplete = initAutocomplete;
+ 
+document.getElementById('phone').addEventListener('input', function (e) {
+  var x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,4})/);
+  e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+});
+</script>
+ 
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8hFydTy4DnmE-qSzItnzsAgxMQ1rgMD8&libraries=places&callback=initAutocomplete" async defer></script>
+<script src="https://www.google.com/recaptcha/api.js?render=6LeT4tQsAAAAAORSP7zCJMbODkKtAdkvBISq0bxm"></script>
+</body>
+</html>
