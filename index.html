@@ -450,6 +450,7 @@ let selDeliverySlot = null, selPickupSlot = null;
 let selPackage      = null;
 let addonQtys       = {};  ADDONS.forEach(a => addonQtys[a.id] = 0);
 let slotBookings    = {};  // key: "YYYY-MM-DD||SlotLabel" → count
+let blockedRanges   = [];  // [{ start: "YYYY-MM-DD", end: "YYYY-MM-DD" }]
 let CAL = {
   delivery: { month:0, year:0 },
   pickup:   { month:0, year:0 },
@@ -460,12 +461,24 @@ function initCals() {
   const n = new Date();
   CAL.delivery.month = n.getMonth();
   CAL.delivery.year  = n.getFullYear();
-  renderCal("delivery");
+  // Fetch blocked dates from sheet so calendar can grey them out
+  fetch(APPS_SCRIPT_URL + "?action=getBlockedDates")
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && data.blockedRanges) blockedRanges = data.blockedRanges;
+      renderCal("delivery");
+    })
+    .catch(() => renderCal("delivery"));
 }
 
 function isAllowed(date, type) {
-  const d = date.getDay();
-  return d === 4; // Thursday only (delivery calendar)
+  if (date.getDay() !== 4) return false; // Thursdays only
+  // Check if this Thursday falls within any blocked range
+  const str = toStr(date);
+  for (const range of blockedRanges) {
+    if (str >= range.start && str <= range.end) return false;
+  }
+  return true;
 }
 
 function isPast(date) {
