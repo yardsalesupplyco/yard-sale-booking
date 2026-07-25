@@ -511,6 +511,8 @@ function navCal(type, dir, event) {
   CAL[type].month += dir;
   if (CAL[type].month>11){CAL[type].month=0; CAL[type].year++;}
   if (CAL[type].month<0) {CAL[type].month=11;CAL[type].year--;}
+  // Cap at December 2027
+  if (CAL[type].year > 2027) { CAL[type].year = 2027; CAL[type].month = 11; }
   renderCal(type);
   // Keep popup open after month navigation
   document.getElementById(type+"Cal").classList.add("open");
