@@ -800,7 +800,7 @@ async function handleSubmit() {
     const addr=document.getElementById("address").value.trim();
     if (!addr) { showError("Please enter your delivery address."); return; }
     if (!validateAddress()) {
-      showError("Your delivery address appears to be outside our area. Email info@yardsalesupplyco.com and we'll see if we can work something out!");
+      showError("Sorry, your address is not in Evansville or Newburgh. Send an email to info@yardsalesupplyco.com and we'll see if we can work something out.");
       return;
     }
   }
@@ -838,8 +838,13 @@ async function handleSubmit() {
   };
 
   try {
-    const res  = await fetch(APPS_SCRIPT_URL + "?payload=" + encodeURIComponent(JSON.stringify(payload)));
-    const data = await res.json();
+    const res  = await fetch(APPS_SCRIPT_URL + "?payload=" + encodeURIComponent(JSON.stringify(payload)), {
+      redirect: "follow",
+      mode: "cors",
+    });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(pe) { throw new Error("Bad response: " + text.slice(0,100)); }
     if (!data.success) {
       showError(data.error||"Something went wrong. Please try again.");
       btn.disabled=false; btn.innerHTML=isCustom?"Send Inquiry →":"Book & Proceed to Payment →";
@@ -847,6 +852,7 @@ async function handleSubmit() {
     }
     showConfirmation(data,payload,isCustom);
   } catch(e) {
+    console.error("Submit error:", e);
     showError("Could not connect to the booking system. Please call or text us directly.");
     btn.disabled=false; btn.innerHTML=isCustom?"Send Inquiry →":"Book & Proceed to Payment →";
   }
