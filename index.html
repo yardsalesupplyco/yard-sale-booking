@@ -838,7 +838,7 @@ async function handleSubmit() {
   };
 
   try {
-    const res  = await fetch(APPS_SCRIPT_URL + "?payload=" + encodeURIComponent(JSON.stringify(payload)), {
+    const res  = await fetch(APPS_SCRIPT_URL + "?payload=" + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(payload))))), {
       redirect: "follow",
       mode: "cors",
     });
